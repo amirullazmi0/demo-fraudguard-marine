@@ -1,6 +1,6 @@
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
-import type { UserRole } from "@prisma/client";
+export type UserRole = "ADMIN" | "ABK";
 
 export const SESSION_COOKIE = "marineguard_session";
 const secret = new TextEncoder().encode(process.env.AUTH_SECRET || "development-only-secret-change-me");
