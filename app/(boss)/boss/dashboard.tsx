@@ -49,7 +49,7 @@ export function Dashboard({
      const fraudCount = logs.filter(log => log.isFraud || Number(log.aiAnalysis.fraud_risk_score) > 70).length; const attentionCount = equipment.filter(item => item.status === "ATTENTION" || item.status === "CRITICAL" || item.logs.some(log => log.aiAnalysis.severity === "Medium" || log.aiAnalysis.severity === "High")).length;
 
      return (
-          <div className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
+          <div className="mx-auto w-full min-w-0 max-w-7xl overflow-hidden px-4 py-6 sm:px-5 sm:py-10 lg:px-8">
                <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
                     <div>
                          <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
@@ -96,7 +96,7 @@ export function Dashboard({
                <div className="mt-8 grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
                     <Card>
                          <CardHeader>
-                              <div className="flex items-center justify-between">
+                              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                    <div>
                                         <CardTitle>Kondisi equipment</CardTitle>
                                         <p className="mt-1 text-sm text-slate-500">
@@ -109,7 +109,7 @@ export function Dashboard({
                          <CardContent className="space-y-3">
                               {equipment.map(item => (
                                    <div
-                                        className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 p-4"
+                                        className="flex min-w-0 flex-col items-start gap-3 rounded-xl border border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between"
                                         key={item.id}
                                    >
                                         <div className="min-w-0">
@@ -120,7 +120,7 @@ export function Dashboard({
                                                   {item.vesselName} · {item.category}
                                              </p>
                                         </div>
-                                        <div className="flex shrink-0 items-center gap-3">
+                                        <div className="flex w-full min-w-0 items-center justify-between gap-3 sm:w-auto sm:justify-end">
                                              <Badge variant={statusMeta[item.status].variant}>
                                                   {statusMeta[item.status].label}
                                              </Badge>
@@ -148,10 +148,10 @@ export function Dashboard({
                                         className="group rounded-xl border border-slate-100 p-3"
                                         key={log.id}
                                    >
-                                        <summary className="flex cursor-pointer list-none items-start gap-3">
+                                        <summary className="flex min-w-0 cursor-pointer list-none items-start gap-3">
                                              <Image src={log.photoUrls[0]} alt="Bukti pemeliharaan" width={48} height={48} className="h-12 w-12 rounded-lg object-cover" />
                                              <span className="min-w-0 flex-1">
-                                                  <span className="flex items-center justify-between gap-2">
+                                                  <span className="flex min-w-0 flex-wrap items-center justify-between gap-2">
                                                        <Link
                                                             href={`/boss/reports/${log.id}`}
                                                             className="truncate text-sm font-semibold text-slate-800 hover:text-cyan-700"
