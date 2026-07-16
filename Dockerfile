@@ -2,21 +2,25 @@ FROM node:22-alpine
 
 WORKDIR /app
 
+ENV DATABASE_URL=postgresql://postgres:postgres@localhost:5432/build_placeholder?schema=public
+
 RUN apk add --no-cache libc6-compat
 
-COPY package.json package-lock.json ./
+RUN corepack enable
 
-RUN npm ci
+COPY package.json yarn.lock ./
+
+RUN yarn install --frozen-lockfile
 
 COPY . .
 
-RUN npx prisma generate
+RUN yarn prisma generate
 
-RUN npm run build
+RUN yarn build
 
 EXPOSE 3001
 
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3001
 
-CMD ["sh", "-c", "npm run start -- -H 0.0.0.0 -p ${PORT}"]
+CMD ["sh", "-c", "yarn start -H 0.0.0.0 -p ${PORT}"]
