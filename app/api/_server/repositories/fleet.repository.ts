@@ -1,7 +1,7 @@
 import type { EquipmentView, VesselView } from "@/lib/types";
 import { prisma } from "@/app/api/_server/db/prisma";
 
-export async function findFleet() {
+export async function findFleet(): Promise<VesselView[]> {
   if (!prisma) return [] as VesselView[];
   const vessels = await prisma.vessel.findMany({
     include: { equipments: { include: { maintenanceLogs: { orderBy: { createdAt: "desc" }, include: { createdBy: true, photos: true } }, photos: true } } },
