@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  ABK
+}
+enum EquipmentCategory {
+  PROPULSION
+  AUXILIARY
+  NAVIGATION
+  SAFETY
+  ELECTRICAL
+  DECK
+  OTHER
+}
+enum EquipmentStatus {
+  OPERATIONAL
+  ATTENTION
+  CRITICAL
+  OFFLINE
+}
+enum Severity {
+  Low
+  Medium
+  High
+}
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  passwordHash String @map("password_hash")
+  role UserRole
+  createdAt DateTime @default(now()) @map("created_at")
+  maintenanceLogs MaintenanceLog[]
+}
+model Vessel {
+  id String @id @default(uuid())
+  name String
+  imoNumber String @unique
+  equipments Equipment[]
+  createdAt DateTime @default(now())
+}
+model Equipment {
+  id String @id @default(uuid())
+  vesselId String
+  vessel Vessel @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+  name String
+  category EquipmentCategory
+  lifespanMonths Int @map("lifespan_months")
+  status EquipmentStatus @default(OPERATIONAL)
+  lastServiceDate DateTime @map("last_service_date")
+  photos EquipmentPhoto[]
+  maintenanceLogs MaintenanceLog[]
+  createdAt DateTime @default(now())
+  @@index([vesselId])
+}
+model EquipmentPhoto {
+  id String @id @default(uuid())
+  equipmentId String
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  url String
+  createdAt DateTime @default(now()) @map("created_at")
+  @@index([equipmentId])
+}
+model MaintenanceLog {
+  id String @id @default(uuid())
+  equipmentId String
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  createdById String @map("created_by")
+  createdBy User @relation(fields: [createdById], references: [id])
+  damageReason String @map("damage_reason")
+  photos MaintenancePhoto[]
+  aiAnalysisJson Json @map("ai_analysis_json")
+  isFraud Boolean @default(false) @map("is_fraud")
+  createdAt DateTime @default(now()) @map("created_at")
+  @@index([equipmentId])
+  @@index([createdById])
+  @@index([isFraud])
+  @@index([createdAt])
+}
+model MaintenancePhoto {
+  id String @id @default(uuid())
+  maintenanceLogId String
+  maintenanceLog MaintenanceLog @relation(fields: [maintenanceLogId], references: [id], onDelete: Cascade)
+  url String
+  createdAt DateTime @default(now()) @map("created_at")
+  @@index([maintenanceLogId])
+}

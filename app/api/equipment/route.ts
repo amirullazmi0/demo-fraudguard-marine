@@ -1,0 +1,8 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/app/api/_server/db/prisma";
+import { requireAdmin, requireSession } from "@/app/api/_server/auth/session";
+import { uploadImages } from "@/app/api/_server/services/imagekit.service";
+const schema = z.object({ vesselId: z.string().uuid(), name: z.string().trim().min(2), category: z.enum(["PROPULSION", "AUXILIARY", "NAVIGATION", "SAFETY", "ELECTRICAL", "DECK", "OTHER"]), lifespanMonths: z.coerce.number().int().positive(), lastServiceDate: z.coerce.date() });
+export async function GET(request: Request) { await requireSession(); if (!prisma) return NextResponse.json({ equipment: [] }); const vesselId = new URL(request.url).searchParams.get("vesselId"); const equipment = await prisma.equipment.findMany({ where: vesselId ? { vesselId } : undefined, include: { photos: true }, orderBy: { name: "asc" } }); return NextResponse.json({ equipment }); }
+export async function POST(request: Request) { await requireAdmin(); if (!prisma) return NextResponse.json({ error: "Database tidak tersedia." }, { status: 503 }); const form = await request.formData(); const parsed = schema.safeParse(Object.fromEntries(form)); const photos = form.getAll("photos").filter((item): item is File => item instanceof File && item.size > 0); if (!parsed.success || photos.length < 1 || photos.length > 10) return NextResponse.json({ error: "Upload 1-10 equipment photos." }, { status: 400 }); const urls = await uploadImages(photos, "/equipment"); const equipment = await prisma.equipment.create({ data: { ...parsed.data, status: "OPERATIONAL", photos: { create: urls.map(url => ({ url })) } }, include: { photos: true } }); return NextResponse.json({ equipment }, { status: 201 }); }

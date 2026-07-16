@@ -1,0 +1,2 @@
+import * as React from "react";
+export function Label({ className, children, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) { return <label className={`text-sm font-medium text-slate-700 ${className ?? ""}`} {...props}>{children}<span aria-hidden="true" className="ml-1 text-rose-500">*</span></label>; }

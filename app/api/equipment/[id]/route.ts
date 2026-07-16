@@ -1,0 +1,9 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/app/api/_server/db/prisma";
+import { requireAdmin } from "@/app/api/_server/auth/session";
+import { uploadImages } from "@/app/api/_server/services/imagekit.service";
+
+const schema = z.object({ vesselId: z.string().uuid(), name: z.string().trim().min(2), category: z.enum(["PROPULSION", "AUXILIARY", "NAVIGATION", "SAFETY", "ELECTRICAL", "DECK", "OTHER"]), lifespanMonths: z.coerce.number().int().positive(), lastServiceDate: z.coerce.date() });
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) { await requireAdmin(); if (!prisma) return NextResponse.json({ error: "Database tidak tersedia." }, { status: 503 }); const id = (await params).id; const form = await request.formData(); const parsed = schema.safeParse(Object.fromEntries(form)); const photos = form.getAll("photos").filter((item): item is File => item instanceof File && item.size > 0); if (!parsed.success || photos.length > 10) return NextResponse.json({ error: "Maximum 10 photos." }, { status: 400 }); const urls = photos.length ? await uploadImages(photos, "/equipment") : null; if (urls) await prisma.equipmentPhoto.deleteMany({ where: { equipmentId: id } }); const equipment = await prisma.equipment.update({ where: { id }, data: { ...parsed.data, ...(urls ? { photos: { create: urls.map(url => ({ url })) } } : {}) }, include: { photos: true } }); return NextResponse.json({ equipment }); }
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) { await requireAdmin(); if (!prisma) return NextResponse.json({ error: "Database tidak tersedia." }, { status: 503 }); await prisma.equipment.delete({ where: { id: (await params).id } }); return NextResponse.json({ success: true }); }

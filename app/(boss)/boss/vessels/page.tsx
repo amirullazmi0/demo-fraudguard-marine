@@ -1,0 +1,3 @@
+import { VesselCrud } from "@/app/(boss)/boss/vessel-crud";
+import { getFleetDashboard } from "@/app/api/_server/services/fleet.service";
+export default async function VesselsPage() { const data = await getFleetDashboard(); return <div className="mx-auto max-w-6xl px-5 py-8 lg:px-8"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">Pengaturan armada</p><h1 className="mt-2 text-3xl font-bold text-slate-950">Vessels</h1><p className="mt-2 text-sm text-slate-500">Kelola data kapal dan nomor IMO.</p><div className="mt-6"><VesselCrud vessels={data.vessels} /></div></div>; }
